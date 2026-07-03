@@ -170,7 +170,7 @@ Exemplo do objeto JSON que o formulário envia:
 - [ ] URL do GitHub Pages testada no browser
 - [ ] Webhook Make.com criado e copiado para `CONFIG.MAKE_WEBHOOK_URL`
 - [ ] Google Sheets criado com as colunas corretas
-- [ ] Z-API configurado com número +5562994738787
+- [ ] Z-API configurado com número +5562992022417
 - [ ] Teste de ponta a ponta com dados fictícios
 
 ---
