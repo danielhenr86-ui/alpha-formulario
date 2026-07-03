@@ -5,32 +5,6 @@
 alpha-consorcio/
 ├── index.html          ← Formulário completo (único arquivo)
 └── README.md
-```
-
-## Deploy no GitHub Pages (passo a passo)
-
-### 1. Criar repositório no GitHub
-1. Acesse https://github.com/new
-2. Nome do repositório: `alpha-consorcio`
-3. Marque como **Public**
-4. Clique em **Create repository**
-
-### 2. Fazer upload do arquivo
-1. Na página do repositório, clique em **Add file → Upload files**
-2. Arraste o `index.html`
-3. Commit: "Deploy formulário Alpha"
-
-### 3. Ativar GitHub Pages
-1. Settings → Pages
-2. Source: **Deploy from a branch**
-3. Branch: **main** → pasta **/ (root)**
-4. Save
-
-### 4. URL final (disponível em ~2 minutos)
-```
-https://SEU-USUARIO.github.io/alpha-consorcio/
-```
-
 ---
 
 ## Configuração Make.com (cenário completo)
