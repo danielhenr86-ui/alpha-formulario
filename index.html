@@ -4,225 +4,824 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Diagnóstico Financeiro Rápido | MetOn</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='126' fill='%230E1B17'/%3E%3Ccircle cx='256' cy='256' r='130' fill='none' stroke='%2312B76A' stroke-width='56'/%3E%3Ccircle cx='256' cy='256' r='49' fill='%2312B76A'/%3E%3C/svg%3E">
+<link rel="icon" href="/assets/meton-icon.svg" type="image/svg+xml">
 <meta name="theme-color" content="#0E1B17">
+<meta name="description" content="Diagnóstico financeiro gratuito da MetOn para identificar os próximos passos do seu negócio.">
+<link rel="apple-touch-icon" href="/assets/meton-icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* ---- Identidade MetOn v1.0 ---- */
-    --grafite:      #0E1B17;   /* base */
-    --verde:        #12B76A;   /* verde sinal - blocos e acentos */
-    --verde-texto:  #07703F;   /* verde profundo - texto pequeno (contraste AA) */
-    --bg:           #F1F4F2;   /* nevoa */
-    --card:         #FFFFFF;
-    --border:       #D8E0DB;   /* linha */
-    --text:         #1B2925;
-    --text-soft:    #5A6B63;   /* ardosia */
-    --red:          #C0392B;   /* status critico */
-    --amber:        #E8A33D;   /* status atencao */
-    /* aliases: mantem o CSS antigo funcionando, ja apontando pro novo sistema */
+    --grafite: #0E1B17;
+    --grafite-2: #162620;
+    --verde: #12B76A;
+    --verde-claro: #DDF7E9;
+    --verde-texto: #087442;
+    --nevoa: #F2F5F3;
+    --card: #FFFFFF;
+    --border: #D7E0DB;
+    --text: #1B2925;
+    --text-soft: #5A6B63;
+    --red: #B83B2E;
+    --amber: #B56E06;
+    --shadow: 0 18px 48px rgba(14, 27, 23, 0.10);
     --navy: var(--grafite);
     --teal: var(--verde-texto);
     --mint: var(--verde);
   }
+
   * { box-sizing: border-box; }
+
   html, body {
-    margin: 0; padding: 0;
-    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--nevoa);
     color: var(--text);
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 620px; margin: 0 auto; padding: 0 20px 70px; }
 
-  .brand-bar { display: flex; align-items: center; justify-content: space-between; padding: 22px 0 26px; }
-  .logo { display: block; line-height: 0; }
-  .logo svg { width: 132px; height: auto; display: block; }
-  @media (max-width: 380px) { .logo svg { width: 112px; } }
-  .consultant-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-soft); text-align: right; }
+  button,
+  input {
+    font: inherit;
+  }
 
-  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin: 0 0 10px; }
-  h1 { font-family: 'Sora', sans-serif; font-weight: 700; font-size: clamp(26px, 5vw, 36px); line-height: 1.2; color: var(--navy); margin: 0 0 14px; }
-  .lede { font-size: 15.5px; line-height: 1.6; color: var(--text-soft); max-width: 46ch; margin: 0 0 32px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 26px 24px; box-shadow: 0 1px 2px rgba(14,27,23,0.05); }
-  .progress-row { display: flex; gap: 6px; margin-bottom: 22px; }
-  .tick { flex: 1; height: 3px; background: var(--border); border-radius: 2px; transition: background 0.3s ease; }
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .wrap {
+    width: min(100%, 720px);
+    margin: 0 auto;
+    padding-inline: 24px;
+  }
+
+  .brand-shell {
+    background: var(--grafite);
+    color: #FFFFFF;
+    border-bottom: 5px solid var(--verde);
+  }
+
+  .brand-wrap {
+    padding-bottom: 26px;
+    transition: padding-bottom 180ms ease;
+  }
+
+  body[data-stage="intro"] .brand-wrap {
+    padding-bottom: 48px;
+  }
+
+  .brand-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 104px;
+  }
+
+  .logo {
+    display: block;
+    line-height: 0;
+    flex: 0 1 220px;
+  }
+
+  .logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .consultant-tag {
+    min-width: max-content;
+    border-left: 1px solid rgba(255, 255, 255, 0.24);
+    padding-left: 18px;
+    text-align: right;
+  }
+
+  .consultant-tag span,
+  .consultant-tag strong {
+    display: block;
+  }
+
+  .consultant-tag span {
+    margin-bottom: 4px;
+    color: rgba(255, 255, 255, 0.64);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .consultant-tag strong {
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .intro {
+    max-width: 630px;
+    padding-top: 24px;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+    color: var(--verde);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 14ch;
+    margin: 0 0 18px;
+    color: #FFFFFF;
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(34px, 7vw, 54px);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+
+  .lede {
+    max-width: 57ch;
+    margin: 0 0 28px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .intro-actions {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .start-note {
+    max-width: 31ch;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.58);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    line-height: 1.5;
+  }
+
+  .app-main {
+    min-height: 180px;
+    padding-top: 34px;
+    padding-bottom: 56px;
+  }
+
+  body[data-stage="intro"] .app-main {
+    padding-top: 22px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: var(--shadow);
+  }
+
+  .progress-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .q-number {
+    color: var(--text-soft);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .progress-label {
+    color: var(--verde-texto);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .progress-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 32px;
+  }
+
+  .tick {
+    flex: 1;
+    height: 4px;
+    background: #E6ECE8;
+    border-radius: 999px;
+    transition: background 180ms ease;
+  }
+
   .tick.done { background: var(--mint); }
   .tick.current { background: var(--teal); }
 
-  .q-number { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-soft); margin-bottom: 8px; }
-  .q-text { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 600; color: var(--navy); line-height: 1.35; margin: 0 0 20px; }
-  .options { display: flex; flex-direction: column; gap: 10px; }
-  .opt {
-    text-align: left; background: transparent; border: 1px solid var(--border); border-radius: 8px;
-    padding: 14px 16px; font-family: 'Inter', sans-serif; font-size: 15px; color: var(--text);
-    cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
+  .q-text {
+    margin: 0 0 24px;
+    color: var(--navy);
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(21px, 4vw, 27px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
   }
-  .opt:hover { border-color: var(--teal); background: #EFF8F3; }
-  .opt:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
 
-  .nav-row { display: flex; justify-content: space-between; margin-top: 22px; }
-  .btn-ghost {
-    background: none; border: none; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-    letter-spacing: 0.05em; color: var(--text-soft); cursor: pointer; padding: 6px 0;
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
+
+  .opt {
+    position: relative;
+    min-height: 56px;
+    padding: 15px 46px 15px 17px;
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1.45;
+    text-align: left;
+    transition: border-color 150ms ease, background 150ms ease, transform 150ms ease;
+  }
+
+  .opt::after {
+    content: "→";
+    position: absolute;
+    right: 17px;
+    top: 50%;
+    color: var(--verde-texto);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    transform: translateY(-50%);
+  }
+
+  .opt:hover {
+    background: #F4FBF7;
+    border-color: var(--verde);
+    transform: translateY(-1px);
+  }
+
+  .opt:focus-visible,
+  .btn-primary:focus-visible,
+  .btn-ghost:focus-visible,
+  .lead-form input:focus-visible,
+  .consent input:focus-visible {
+    outline: 3px solid rgba(18, 183, 106, 0.32);
+    outline-offset: 3px;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 26px;
+  }
+
+  .btn-ghost {
+    padding: 8px 0;
+    background: none;
+    border: none;
+    color: var(--text-soft);
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
   .btn-ghost:hover { color: var(--navy); }
   .btn-ghost:disabled { opacity: 0.3; cursor: default; }
 
-  #screen-result { display: none; text-align: center; }
-  .badge-zone { display: flex; align-items: center; justify-content: center; height: 168px; margin-bottom: 4px; }
+  #screen-result,
+  #screen-thanks {
+    display: none;
+  }
+
+  .result-heading {
+    margin-bottom: 22px;
+    text-align: center;
+  }
+
+  .result-mark {
+    display: block;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 14px;
+    border-radius: 14px;
+  }
+
+  .badge-zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 178px;
+    margin-bottom: 8px;
+  }
+
   .badge {
-    width: 156px; height: 156px; border-radius: 50%; border: 5px solid currentColor;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-family: 'IBM Plex Mono', monospace; transform: scale(0.7); opacity: 0;
+    display: flex;
+    width: 164px;
+    height: 164px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border: 5px solid currentColor;
+    border-radius: 50%;
+    opacity: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    transform: scale(0.7);
     animation: badge-in 0.45s cubic-bezier(.2,1.4,.4,1) 0.1s forwards;
   }
-  @media (prefers-reduced-motion: reduce) { .badge { animation: none; opacity: 1; transform: scale(1); } }
+
   @keyframes badge-in {
     0% { transform: scale(0.7); opacity: 0; }
     60% { transform: scale(1.06); opacity: 1; }
     100% { transform: scale(1); opacity: 1; }
   }
-  .badge-pct { font-size: 32px; font-weight: 700; line-height: 1; }
-  .badge-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
+
+  .badge-pct {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .badge-label {
+    margin-top: 8px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   .cat-critico { color: var(--red); }
   .cat-atencao { color: var(--amber); }
   .cat-organizado { color: var(--teal); }
 
-  .cat-title { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; color: var(--navy); margin: 6px 0 12px; }
-  .cat-desc { font-size: 15px; line-height: 1.65; color: var(--text-soft); text-align: left; margin: 0 0 26px; }
+  .cat-title {
+    margin: 6px 0 14px;
+    color: var(--navy);
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(24px, 5vw, 31px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .cat-desc {
+    margin: 0 0 30px;
+    color: var(--text-soft);
+    font-size: 15px;
+    line-height: 1.7;
+    text-align: left;
+  }
+
   .cat-desc strong { color: var(--navy); }
 
-  .lead-form { text-align: left; border-top: 1px dashed var(--border); padding-top: 22px; }
+  .lead-form {
+    padding-top: 26px;
+    border-top: 1px solid var(--border);
+    text-align: left;
+  }
+
   .lead-form label {
-    display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-    letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-soft); margin: 0 0 6px;
+    display: block;
+    margin: 0 0 8px;
+    color: var(--text-soft);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
-  .lead-form input {
-    width: 100%; font-family: 'Inter', sans-serif; font-size: 15px; padding: 11px 12px;
-    border: 1px solid var(--border); border-radius: 8px; margin-bottom: 14px; background: #fff;
+
+  .lead-form input:not([type="checkbox"]) {
+    width: 100%;
+    min-height: 52px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    color: var(--text);
+    font-size: 16px;
   }
-  .lead-form input:focus-visible { outline: 2px solid var(--teal); }
+
+  .lead-form input:not([type="checkbox"])::placeholder {
+    color: #8A9991;
+  }
+
   .btn-primary {
-    width: 100%; background: var(--navy); color: #fff; border: none; border-radius: 8px;
-    padding: 14px 16px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;
+    min-height: 54px;
+    padding: 15px 22px;
+    background: var(--grafite);
+    border: 1px solid var(--grafite);
+    border-radius: 12px;
+    color: #FFFFFF;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
   }
-  .btn-primary:hover { background: var(--teal); }
+
+  .lead-form .btn-primary {
+    width: 100%;
+  }
+
+  .btn-primary:hover {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: var(--grafite);
+    transform: translateY(-1px);
+  }
+
   .btn-primary:disabled { opacity: 0.5; cursor: default; }
 
-  .form-error { font-size: 13px; color: var(--red); margin: -4px 0 14px; display: none; }
+  .btn-hero {
+    min-width: 218px;
+    background: var(--verde);
+    border-color: var(--verde);
+    color: var(--grafite);
+  }
 
-  #screen-thanks { display: none; text-align: center; }
+  .btn-hero:hover {
+    background: #FFFFFF;
+    border-color: #FFFFFF;
+  }
+
+  .form-error {
+    display: none;
+    margin: -4px 0 12px;
+    color: var(--red);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .form-fallback {
+    display: none;
+    width: fit-content;
+    margin: 0 0 18px;
+    color: var(--teal);
+    border-bottom: 1px solid currentColor;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .hp-field {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
   .whatsapp-link {
-    display: inline-block; margin-top: 6px; color: var(--teal); font-weight: 600;
-    text-decoration: none; border-bottom: 1px solid var(--teal);
+    display: inline-block;
+    margin-top: 6px;
+    color: var(--teal);
+    border-bottom: 1px solid var(--teal);
+    font-weight: 700;
+    text-decoration: none;
   }
-  /* ---- assinatura da marca: o ponto de sinal ---- */
+
   .signal-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--verde);
-    display: inline-block; position: relative; flex: none;
+    position: relative;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex: none;
+    background: var(--verde);
+    border-radius: 50%;
   }
+
   .signal-dot::after {
-    content: ""; position: absolute; inset: 0; border-radius: 50%;
-    border: 1px solid var(--verde); animation: sinal 2.6s ease-out infinite;
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--verde);
+    border-radius: 50%;
+    animation: sinal 2.6s ease-out infinite;
   }
+
   @keyframes sinal {
     0%   { transform: scale(1); opacity: 0.7; }
     70%  { transform: scale(3); opacity: 0; }
     100% { transform: scale(3); opacity: 0; }
   }
-  @media (prefers-reduced-motion: reduce) { .signal-dot::after { animation: none; opacity: 0; } }
 
-  .btn-inner { display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+  .btn-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
 
   .form-note {
-    display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 0.04em; color: var(--text-soft); margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 22px;
+    color: var(--text-soft);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
   }
 
-  /* vem depois de .lead-form label de proposito, para sobrescrever o estilo de rotulo */
-  .consent { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0 16px; }
+  .consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin: 6px 0 20px;
+  }
+
   .consent input[type="checkbox"] {
-    width: 16px; height: 16px; margin: 2px 0 0; flex: none;
-    accent-color: var(--verde-texto); border-radius: 4px;
-  }
-  .consent label {
-    font-family: 'Inter', sans-serif; font-size: 12.5px; line-height: 1.5;
-    color: var(--text-soft); text-transform: none; letter-spacing: 0; margin: 0; cursor: pointer;
-  }
-  .privacy {
-    font-size: 11.5px; line-height: 1.55; color: var(--text-soft);
-    border-left: 2px solid var(--border); padding-left: 10px; margin: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    flex: none;
+    accent-color: var(--verde-texto);
+    border-radius: 4px;
   }
 
-  footer { margin-top: 36px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #A9B8B0; }
+  .consent label {
+    margin: 0;
+    color: var(--text-soft);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0;
+    line-height: 1.55;
+    text-transform: none;
+  }
+
+  .privacy {
+    margin: 0 0 20px;
+    padding: 13px 14px;
+    background: #F5F8F6;
+    border-left: 3px solid var(--verde);
+    border-radius: 0 8px 8px 0;
+    color: var(--text-soft);
+    font-size: 11.5px;
+    line-height: 1.6;
+  }
+
+  .thanks-card {
+    padding-block: 44px;
+    text-align: center;
+  }
+
+  .thanks-card .eyebrow {
+    justify-content: center;
+  }
+
+  .thanks-card .cat-desc {
+    max-width: 44ch;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 42px;
+    color: #819087;
+  }
+
+  footer img {
+    width: 112px;
+    height: auto;
+  }
+
+  footer span {
+    padding-left: 18px;
+    border-left: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  @media (max-width: 560px) {
+    .wrap {
+      padding-inline: 18px;
+    }
+
+    .brand-bar {
+      min-height: 88px;
+      gap: 16px;
+    }
+
+    .logo {
+      flex-basis: 164px;
+    }
+
+    .consultant-tag {
+      padding-left: 12px;
+    }
+
+    .consultant-tag span {
+      display: none;
+    }
+
+    .consultant-tag strong {
+      max-width: 11ch;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .intro {
+      padding-top: 18px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 10vw, 43px);
+    }
+
+    .lede {
+      font-size: 15px;
+    }
+
+    .intro-actions {
+      align-items: stretch;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn-hero {
+      width: 100%;
+    }
+
+    .start-note {
+      max-width: none;
+      text-align: center;
+    }
+
+    body[data-stage="intro"] .brand-wrap {
+      padding-bottom: 36px;
+    }
+
+    .app-main {
+      padding-top: 24px;
+    }
+
+    .card {
+      padding: 24px 20px;
+      border-radius: 15px;
+    }
+
+    .progress-row {
+      margin-bottom: 26px;
+    }
+
+    .q-text {
+      font-size: 21px;
+    }
+
+    .opt {
+      min-height: 58px;
+      padding-left: 15px;
+      font-size: 14px;
+    }
+
+    .badge-zone {
+      min-height: 164px;
+    }
+
+    .badge {
+      width: 150px;
+      height: 150px;
+    }
+
+    footer {
+      align-items: flex-start;
+      gap: 13px;
+      margin-top: 34px;
+    }
+
+    footer img {
+      width: 98px;
+    }
+
+    footer span {
+      padding-left: 13px;
+    }
+  }
+
+  @media (max-width: 370px) {
+    .logo {
+      flex-basis: 138px;
+    }
+
+    .consultant-tag strong {
+      font-size: 10px;
+    }
+
+    .card {
+      padding-inline: 17px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+
+    .badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .signal-dot::after {
+      opacity: 0;
+    }
+  }
 </style>
 </head>
-<body>
-<div class="wrap">
-
-  <div class="brand-bar">
-    <div class="logo">
-      <svg viewBox="-9 -9 432 176" role="img" aria-label="MetOn Inteligência Contábil">
-        <title>MetOn Inteligência Contábil</title>
-        <g fill="none" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
-          <g stroke="#0E1B17">
-            <path d="M 0,100 L 0,0 L 44,52 L 88,0 L 88,100"/>
-            <path d="M 176,64 L 104,64 A 36,36 0 1,1 165.5,89.5"/>
-            <path d="M 218,4 L 218,100"/>
-            <path d="M 194,28 L 242,28"/>
-          </g>
-          <g stroke="#12B76A">
-            <circle cx="298" cy="50" r="42"/>
-            <path d="M 358,100 L 358,56 A 28,28 0 0,1 414,56 L 414,100"/>
-          </g>
-          <circle cx="298" cy="50" r="16" fill="#12B76A" stroke="none"/>
-        </g>
-        <text x="0" y="152" textLength="414" lengthAdjust="spacing"
-              font-family="Inter, Helvetica, Arial, sans-serif" font-size="27"
-              font-weight="500" fill="#5A6B63">INTELIGÊNCIA CONTÁBIL</text>
-      </svg>
+<body data-stage="intro">
+<header class="brand-shell">
+  <div class="wrap brand-wrap">
+    <div class="brand-bar">
+      <div class="logo">
+        <img src="/assets/meton-logo-light.png" width="1200" height="328" alt="MetOn">
+      </div>
+      <div class="consultant-tag">
+        <span>Diagnóstico com</span>
+        <strong>Daniel Henrique</strong>
+      </div>
     </div>
-    <div class="consultant-tag">Consultor<br>Daniel Henrique</div>
-  </div>
 
-  <div id="screen-intro">
-    <p class="eyebrow">Diagnóstico gratuito · 2 minutos</p>
-    <h1>Como está a saúde financeira do seu negócio?</h1>
-    <p class="lede">8 perguntas rápidas sobre fluxo de caixa, organização fiscal e precificação. No final, você recebe um raio-x com o que corrigir primeiro — direto do Consultor Daniel Henrique.</p>
-    <div class="card">
-      <p style="margin:0 0 20px; color:var(--text-soft); font-size:14px;">Sem cadastro para começar — o contato só é pedido no final, se você quiser o plano de ação.</p>
-      <button class="btn-primary" onclick="startQuiz()">Começar diagnóstico</button>
-    </div>
+    <section class="intro" id="screen-intro" aria-labelledby="intro-title">
+      <p class="eyebrow"><span class="signal-dot" aria-hidden="true"></span> Diagnóstico gratuito · 2 minutos</p>
+      <h1 id="intro-title">Como está a saúde financeira do seu negócio?</h1>
+      <p class="lede">Responda 8 perguntas sobre caixa, organização fiscal e precificação. No final, veja o que corrigir primeiro e solicite um plano de ação com a MetOn.</p>
+      <div class="intro-actions">
+        <button class="btn-primary btn-hero" type="button" onclick="startQuiz()">Começar diagnóstico</button>
+        <p class="start-note">Sem cadastro para começar. Seu contato só é pedido ao final.</p>
+      </div>
+    </section>
   </div>
+</header>
 
-  <div id="screen-quiz" style="display:none;">
+<main class="wrap app-main">
+  <section id="screen-quiz" style="display:none;" aria-live="polite">
     <div class="card">
-      <div class="progress-row" id="progress-row"></div>
-      <div class="q-number" id="q-number"></div>
+      <div class="progress-meta">
+        <div class="q-number" id="q-number"></div>
+        <div class="progress-label" id="progress-label"></div>
+      </div>
+      <div class="progress-row" id="progress-row" role="progressbar" aria-label="Progresso do diagnóstico"></div>
       <p class="q-text" id="q-text"></p>
       <div class="options" id="q-options"></div>
       <div class="nav-row">
-        <button class="btn-ghost" id="btn-back" onclick="goBack()">← Voltar</button>
+        <button class="btn-ghost" type="button" id="btn-back" onclick="goBack()">← Voltar</button>
         <span></span>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div id="screen-result">
+  <section id="screen-result" aria-live="polite">
+    <div class="result-heading">
+      <img class="result-mark" src="/assets/meton-icon.svg" width="512" height="512" alt="">
+      <p class="eyebrow" style="justify-content:center;">Seu diagnóstico MetOn</p>
+    </div>
     <div class="badge-zone">
       <div class="badge" id="badge">
         <span class="badge-pct" id="badge-pct"></span>
         <span class="badge-label" id="badge-label"></span>
       </div>
     </div>
-    <div class="card" style="text-align:left;">
+    <div class="card">
       <p class="cat-title" id="cat-title" style="text-align:center;"></p>
       <p class="cat-desc" id="cat-desc"></p>
 
       <form class="lead-form" onsubmit="submitLead(event)">
-        <p class="form-note"><span class="signal-dot"></span> Resposta em até 1 dia útil</p>
+        <p class="form-note"><span class="signal-dot" aria-hidden="true"></span> Resposta em até 1 dia útil</p>
 
         <label for="lead-name">Seu nome</label>
         <input id="lead-name" type="text" required autocomplete="name" placeholder="Como podemos te chamar">
@@ -230,9 +829,15 @@
         <label for="lead-contact">WhatsApp ou e-mail</label>
         <input id="lead-contact" type="text" required inputmode="text" autocomplete="tel email" placeholder="Para enviar seu plano de ação">
 
-        <p class="form-error" id="form-error">Não deu pra registrar agora, mas segue pelo WhatsApp que funciona igual.</p>
+        <p class="form-error" id="form-error" role="alert" aria-live="polite">Não foi possível registrar agora. Seus dados continuam preenchidos para você tentar novamente.</p>
+        <a class="form-fallback" id="form-whatsapp-fallback" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp →</a>
 
-        <p class="privacy">Usamos seu nome e contato só para preparar e enviar o seu plano de ação. Não vendemos e não repassamos seus dados para terceiros. Você pode pedir a exclusão a qualquer momento pelo mesmo contato.</p>
+        <div class="hp-field" aria-hidden="true">
+          <label for="lead-company-site">Site da empresa</label>
+          <input id="lead-company-site" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
+        <p class="privacy">Usamos seu nome e contato só para preparar e enviar o seu plano de ação. O envio é processado pela Formspree exclusivamente para entregar sua solicitação. Não vendemos seus dados, e você pode pedir a exclusão a qualquer momento pelo mesmo contato.</p>
 
         <div class="consent">
           <input type="checkbox" id="lead-optin">
@@ -240,24 +845,27 @@
         </div>
 
         <button class="btn-primary" type="submit" id="btn-submit-lead">
-          <span class="btn-inner"><span class="signal-dot"></span>Quero meu plano de ação</span>
+          <span class="btn-inner"><span class="signal-dot" aria-hidden="true"></span>Quero meu plano de ação</span>
         </button>
       </form>
     </div>
-  </div>
+  </section>
 
-  <div id="screen-thanks">
-    <div class="card">
-      <p class="eyebrow" style="text-align:center;">Recebido</p>
+  <section id="screen-thanks">
+    <div class="card thanks-card">
+      <img class="result-mark" src="/assets/meton-icon.svg" width="512" height="512" alt="">
+      <p class="eyebrow"><span class="signal-dot" aria-hidden="true"></span> Recebido</p>
       <p class="cat-title">Diagnóstico enviado</p>
-      <p class="cat-desc" style="text-align:center;">Guardamos sua pontuação. O Consultor Daniel Henrique recebe seu contato e te chama com o plano de ação.</p>
-      <a class="whatsapp-link" id="whatsapp-cta" href="#" target="_blank" rel="noopener">Falar agora com o Consultor Daniel Henrique →</a>
+      <p class="cat-desc">Guardamos sua pontuação. Daniel Henrique recebe seu contato e fala com você sobre o plano de ação.</p>
+      <a class="whatsapp-link" id="whatsapp-cta" href="#" target="_blank" rel="noopener">Falar agora com Daniel Henrique →</a>
     </div>
-  </div>
+  </section>
 
-  <footer>MetOn — inteligência contábil</footer>
-
-</div>
+  <footer>
+    <img src="/assets/meton-logo-dark.png" width="1600" height="437" alt="MetOn">
+    <span>Inteligência contábil<br>para decisões claras.</span>
+  </footer>
+</main>
 
 <script>
 const WHATSAPP_NUMBER = "5562994738787";
@@ -321,9 +929,15 @@ let finalScore = 0;
 let finalPct = 0;
 let finalCategory = null;
 
+function setStage(stage){
+  document.body.dataset.stage = stage;
+  window.scrollTo(0, 0);
+}
+
 function startQuiz(){
   document.getElementById('screen-intro').style.display='none';
   document.getElementById('screen-quiz').style.display='block';
+  setStage('quiz');
   renderQuestion();
 }
 
@@ -335,6 +949,11 @@ function renderProgress(){
     t.className = 'tick' + (i < current ? ' done' : (i === current ? ' current' : ''));
     row.appendChild(t);
   });
+  row.setAttribute('aria-valuemin', '1');
+  row.setAttribute('aria-valuemax', String(questions.length));
+  row.setAttribute('aria-valuenow', String(current + 1));
+  document.getElementById('progress-label').textContent =
+    Math.round(((current + 1) / questions.length) * 100) + '%';
 }
 
 function renderQuestion(){
@@ -346,6 +965,7 @@ function renderQuestion(){
   opts.innerHTML = '';
   q.options.forEach(o=>{
     const b = document.createElement('button');
+    b.type = 'button';
     b.className = 'opt';
     b.textContent = o.label;
     b.onclick = () => selectOption(o.pts);
@@ -381,6 +1001,7 @@ function finishQuiz(){
 function renderResult(){
   document.getElementById('screen-quiz').style.display='none';
   document.getElementById('screen-result').style.display='block';
+  setStage('result');
   const badge = document.getElementById('badge');
   badge.className = 'badge ' + finalCategory.cls;
   document.getElementById('badge-pct').textContent = finalPct + '%';
@@ -395,6 +1016,8 @@ async function submitLead(event){
   const contact = document.getElementById('lead-contact').value.trim();
   const btn = document.getElementById('btn-submit-lead');
   const errorEl = document.getElementById('form-error');
+  const fallbackEl = document.getElementById('form-whatsapp-fallback');
+  const originalButtonHtml = btn.innerHTML;
 
   // valida o contato antes de gastar a requisicao: lead com contato errado e lead perdido
   const pareceEmail = /\S+@\S+\.\S+/.test(contact);
@@ -407,33 +1030,53 @@ async function submitLead(event){
 
   btn.disabled = true;
   btn.textContent = 'Enviando…';
-  errorEl.textContent = 'Não deu pra registrar agora, mas segue pelo WhatsApp que funciona igual.';
+  errorEl.textContent = 'Não foi possível registrar agora. Seus dados continuam preenchidos para você tentar novamente.';
   errorEl.style.display = 'none';
+  fallbackEl.style.display = 'none';
 
   const payload = {
     nome: name,
     contato: contact,
     pontuacao: finalPct,
     situacao: finalCategory.label,
-    consentimento_marketing: document.getElementById('lead-optin').checked
+    consentimento_marketing: document.getElementById('lead-optin').checked,
+    origem: 'diagnostico',
+    empresa_website: document.getElementById('lead-company-site').value
   };
 
   try {
-    await fetch('/api/lead', {
+    const response = await fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-  } catch (err) {
-    console.error('Falha ao registrar lead:', err);
-    errorEl.style.display = 'block';
-  }
 
-  document.getElementById('screen-result').style.display='none';
-  document.getElementById('screen-thanks').style.display='block';
-  const wa = document.getElementById('whatsapp-cta');
-  const msg = encodeURIComponent('Oi ' + CONSULTANT_NAME + '! Acabei de fazer o diagnóstico financeiro da MetOn e tirei ' + finalPct + '% (' + finalCategory.label + '). Quero saber mais.');
-  wa.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + msg;
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result || result.ok !== true) {
+      throw new Error(result && result.error ? result.error : 'lead_delivery_failed');
+    }
+
+    document.getElementById('screen-result').style.display='none';
+    document.getElementById('screen-thanks').style.display='block';
+    setStage('thanks');
+    const wa = document.getElementById('whatsapp-cta');
+    const msg = encodeURIComponent('Oi ' + CONSULTANT_NAME + '! Acabei de fazer o diagnóstico financeiro da MetOn e tirei ' + finalPct + '% (' + finalCategory.label + '). Quero saber mais.');
+    wa.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + msg;
+  } catch (err) {
+    console.error('Falha ao registrar lead:', err instanceof Error ? err.message : 'unknown_error');
+    errorEl.style.display = 'block';
+
+    const fallbackMsg = encodeURIComponent(
+      'Oi ' + CONSULTANT_NAME + '! Fiz o diagnóstico financeiro da MetOn e tirei ' +
+      finalPct + '% (' + finalCategory.label + '). Meu nome é ' + name +
+      ' e meu contato é ' + contact + '.'
+    );
+    fallbackEl.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + fallbackMsg;
+    fallbackEl.style.display = 'inline-block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalButtonHtml;
+  }
 }
 </script>
 </body>
