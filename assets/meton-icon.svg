@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>MetOn</title>
+  <rect width="512" height="512" rx="126" fill="#0E1B17"/>
+  <circle cx="256" cy="256" r="130" fill="none" stroke="#12B76A" stroke-width="56"/>
+  <circle cx="256" cy="256" r="49" fill="#12B76A"/>
+</svg>

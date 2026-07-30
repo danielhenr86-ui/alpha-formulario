@@ -4,7 +4,8 @@
   "private": true,
   "description": "Diagnóstico financeiro e captação de leads da MetOn",
   "scripts": {
-    "check": "node --check api/lead.js && node --test",
+    "check": "node --check api/lead.js && node --check scripts/dev-server.js && node --test",
+    "dev": "node scripts/dev-server.js",
     "test": "node --test"
   },
   "engines": {
