@@ -111,7 +111,17 @@
   .btn-primary:hover { background: var(--teal); }
   .btn-primary:disabled { opacity: 0.5; cursor: default; }
 
-  .form-error { font-size: 13px; color: var(--red); margin: -4px 0 14px; display: none; }
+  .form-error { font-size: 13px; color: var(--red); margin: -4px 0 8px; display: none; }
+  .form-fallback {
+    display: none; width: fit-content; margin: 0 0 16px; color: var(--teal);
+    font-size: 13px; font-weight: 600; text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+  .hp-field {
+    position: absolute !important; width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important;
+  }
 
   #screen-thanks { display: none; text-align: center; }
   .whatsapp-link {
@@ -230,7 +240,13 @@
         <label for="lead-contact">WhatsApp ou e-mail</label>
         <input id="lead-contact" type="text" required inputmode="text" autocomplete="tel email" placeholder="Para enviar seu plano de ação">
 
-        <p class="form-error" id="form-error">Não deu pra registrar agora, mas segue pelo WhatsApp que funciona igual.</p>
+        <p class="form-error" id="form-error" role="alert" aria-live="polite">Não foi possível registrar agora. Seus dados continuam preenchidos para você tentar novamente.</p>
+        <a class="form-fallback" id="form-whatsapp-fallback" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp →</a>
+
+        <div class="hp-field" aria-hidden="true">
+          <label for="lead-company-site">Site da empresa</label>
+          <input id="lead-company-site" type="text" tabindex="-1" autocomplete="off">
+        </div>
 
         <p class="privacy">Usamos seu nome e contato só para preparar e enviar o seu plano de ação. Não vendemos e não repassamos seus dados para terceiros. Você pode pedir a exclusão a qualquer momento pelo mesmo contato.</p>
 
@@ -395,6 +411,8 @@ async function submitLead(event){
   const contact = document.getElementById('lead-contact').value.trim();
   const btn = document.getElementById('btn-submit-lead');
   const errorEl = document.getElementById('form-error');
+  const fallbackEl = document.getElementById('form-whatsapp-fallback');
+  const originalButtonHtml = btn.innerHTML;
 
   // valida o contato antes de gastar a requisicao: lead com contato errado e lead perdido
   const pareceEmail = /\S+@\S+\.\S+/.test(contact);
@@ -407,33 +425,52 @@ async function submitLead(event){
 
   btn.disabled = true;
   btn.textContent = 'Enviando…';
-  errorEl.textContent = 'Não deu pra registrar agora, mas segue pelo WhatsApp que funciona igual.';
+  errorEl.textContent = 'Não foi possível registrar agora. Seus dados continuam preenchidos para você tentar novamente.';
   errorEl.style.display = 'none';
+  fallbackEl.style.display = 'none';
 
   const payload = {
     nome: name,
     contato: contact,
     pontuacao: finalPct,
     situacao: finalCategory.label,
-    consentimento_marketing: document.getElementById('lead-optin').checked
+    consentimento_marketing: document.getElementById('lead-optin').checked,
+    origem: 'diagnostico',
+    empresa_website: document.getElementById('lead-company-site').value
   };
 
   try {
-    await fetch('/api/lead', {
+    const response = await fetch('/api/lead', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-  } catch (err) {
-    console.error('Falha ao registrar lead:', err);
-    errorEl.style.display = 'block';
-  }
 
-  document.getElementById('screen-result').style.display='none';
-  document.getElementById('screen-thanks').style.display='block';
-  const wa = document.getElementById('whatsapp-cta');
-  const msg = encodeURIComponent('Oi ' + CONSULTANT_NAME + '! Acabei de fazer o diagnóstico financeiro da MetOn e tirei ' + finalPct + '% (' + finalCategory.label + '). Quero saber mais.');
-  wa.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + msg;
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result || result.ok !== true) {
+      throw new Error(result && result.error ? result.error : 'lead_delivery_failed');
+    }
+
+    document.getElementById('screen-result').style.display='none';
+    document.getElementById('screen-thanks').style.display='block';
+    const wa = document.getElementById('whatsapp-cta');
+    const msg = encodeURIComponent('Oi ' + CONSULTANT_NAME + '! Acabei de fazer o diagnóstico financeiro da MetOn e tirei ' + finalPct + '% (' + finalCategory.label + '). Quero saber mais.');
+    wa.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + msg;
+  } catch (err) {
+    console.error('Falha ao registrar lead:', err instanceof Error ? err.message : 'unknown_error');
+    errorEl.style.display = 'block';
+
+    const fallbackMsg = encodeURIComponent(
+      'Oi ' + CONSULTANT_NAME + '! Fiz o diagnóstico financeiro da MetOn e tirei ' +
+      finalPct + '% (' + finalCategory.label + '). Meu nome é ' + name +
+      ' e meu contato é ' + contact + '.'
+    );
+    fallbackEl.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + fallbackMsg;
+    fallbackEl.style.display = 'inline-block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalButtonHtml;
+  }
 }
 </script>
 </body>
