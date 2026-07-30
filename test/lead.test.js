@@ -133,16 +133,24 @@ test('propaga falha segura quando o destino rejeita a entrega', async () => {
   assert.deepEqual(res.body, { ok: false, error: 'lead_delivery_failed' });
 });
 
-test('falha de forma explícita quando o webhook não está configurado', async () => {
+test('usa o Formspree da MetOn quando não há webhook personalizado', async () => {
   delete process.env.LEAD_WEBHOOK_URL;
-  global.fetch = async () => {
-    throw new Error('fetch não deveria ser chamado');
+  let deliveredRequest;
+  global.fetch = async (url, options) => {
+    deliveredRequest = { url, options };
+    return { ok: true, status: 200 };
   };
 
   const res = await callHandler();
 
-  assert.equal(res.statusCode, 503);
-  assert.deepEqual(res.body, { ok: false, error: 'lead_service_unavailable' });
+  assert.equal(res.statusCode, 201);
+  assert.deepEqual(res.body, { ok: true });
+  assert.equal(deliveredRequest.url, handler._internals.DEFAULT_LEAD_WEBHOOK_URL);
+  assert.equal(deliveredRequest.options.headers.Accept, 'application/json');
+
+  const deliveredLead = JSON.parse(deliveredRequest.options.body);
+  assert.equal(deliveredLead._subject, 'Novo diagnóstico financeiro — MetOn');
+  assert.equal(deliveredLead._replyto, 'daniel@example.com');
 });
 
 test('rejeita chamadas de outra origem', async () => {

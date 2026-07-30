@@ -2,15 +2,23 @@
 
 Página estática com uma Vercel Function para receber e encaminhar leads com confirmação real de entrega.
 
-## Configuração obrigatória na Vercel
+## Destino dos leads
 
-Crie a variável de ambiente abaixo em **Development**, **Preview** e **Production**:
+Por padrão, o endpoint encaminha os diagnósticos para o mesmo formulário Formspree já utilizado pela Mentoria MetOn:
+
+```text
+https://formspree.io/f/maqrdbnb
+```
+
+O navegador não acessa o Formspree diretamente. A Vercel Function valida o lead, aplica as proteções básicas e só mostra sucesso quando o Formspree confirma a entrega.
+
+Para trocar o destino futuramente por banco, CRM ou outra automação, crie a variável abaixo em **Development**, **Preview** e **Production**:
 
 ```text
 LEAD_WEBHOOK_URL=https://seu-endpoint-seguro.example/leads
 ```
 
-O endpoint deve persistir o lead em banco, CRM ou automação e só retornar `2xx` depois da gravação. Sem essa variável, `/api/lead` responde `503` e a interface preserva os dados para nova tentativa; ela não mostra um falso sucesso.
+O destino personalizado deve retornar `2xx` somente depois da persistência. Se recusar ou ficar indisponível, a interface preserva os dados para nova tentativa e não mostra um falso sucesso.
 
 Opcionalmente, proteja o webhook com um token Bearer:
 

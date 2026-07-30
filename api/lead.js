@@ -6,6 +6,7 @@ const MAX_BODY_BYTES = 8 * 1024;
 const DELIVERY_TIMEOUT_MS = 8_000;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
+const DEFAULT_LEAD_WEBHOOK_URL = 'https://formspree.io/f/maqrdbnb';
 const ALLOWED_SITUATIONS = new Set(['Ponto crítico', 'Atenção', 'Organizado']);
 const rateLimitBuckets = new Map();
 
@@ -147,8 +148,7 @@ async function readJsonBody(req) {
 }
 
 function getWebhookUrl() {
-  const configuredUrl = process.env.LEAD_WEBHOOK_URL;
-  if (!configuredUrl) return null;
+  const configuredUrl = process.env.LEAD_WEBHOOK_URL || DEFAULT_LEAD_WEBHOOK_URL;
 
   try {
     const url = new URL(configuredUrl);
@@ -170,6 +170,7 @@ async function deliverLead(lead, requestId) {
   const timeout = setTimeout(() => controller.abort(), DELIVERY_TIMEOUT_MS);
   const headers = {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
     'X-Meton-Source': 'diagnostico',
     'X-Request-Id': requestId
   };
@@ -179,14 +180,23 @@ async function deliverLead(lead, requestId) {
   }
 
   try {
+    const deliveryPayload = {
+      ...lead,
+      enviado_em: new Date().toISOString(),
+      request_id: requestId
+    };
+
+    if (new URL(webhookUrl).hostname === 'formspree.io') {
+      deliveryPayload._subject = 'Novo diagnóstico financeiro — MetOn';
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.contato)) {
+        deliveryPayload._replyto = lead.contato;
+      }
+    }
+
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers,
-      body: JSON.stringify({
-        ...lead,
-        enviado_em: new Date().toISOString(),
-        request_id: requestId
-      }),
+      body: JSON.stringify(deliveryPayload),
       signal: controller.signal
     });
 
@@ -263,6 +273,7 @@ async function handler(req, res) {
 
 module.exports = handler;
 module.exports._internals = {
+  DEFAULT_LEAD_WEBHOOK_URL,
   checkRateLimit,
   validateLead,
   resetRateLimits: () => rateLimitBuckets.clear()
