@@ -8,8 +8,5 @@
   },
   "dependencies": {
     "nodemailer": "^7.0.6"
-  },
-  "scripts": {
-    "build": "node scripts/smtp-smoke-test.js"
   }
 }
