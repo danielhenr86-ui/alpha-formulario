@@ -85,40 +85,6 @@ function buildEmail(data) {
 }
 
 module.exports = async function handler(req,res){
-  if(req.method==='GET') {
-    const configured=Boolean(process.env.SMTP_HOST&&process.env.SMTP_USER&&process.env.SMTP_PASS&&(process.env.SMTP_FROM||process.env.SMTP_USER));
-    const url=new URL(req.url,'http://localhost');
-    if(url.searchParams.get('sendTest')==='1'){
-      if(!configured) return json(res,503,{ok:false,error:'smtp_not_configured'});
-      try{
-        const host=String(process.env.SMTP_HOST||'').trim();
-        const port=Number(process.env.SMTP_PORT||465);
-        const user=String(process.env.SMTP_USER||'').trim();
-        const pass=process.env.SMTP_PASS;
-        const from=String(process.env.SMTP_FROM||user).trim();
-        const recipient=String(process.env.FORM_RECIPIENT||'contato@metongestao.com.br').trim();
-        const transporter=nodemailer.createTransport({
-          host,
-          port,
-          secure:String(process.env.SMTP_SECURE??'true').toLowerCase()!=='false',
-          auth:{user,pass}
-        });
-        await transporter.verify();
-        const info=await transporter.sendMail({
-          from:`MetOn Gestão <${from}>`,
-          to:recipient,
-          subject:'[TESTE SMTP] Diagnóstico MetOn via Vercel',
-          text:'Teste real do envio SMTP do Diagnóstico MetOn Gestão executado a partir da função serverless no Vercel.'
-        });
-        console.log('smtp_test_sent',{messageId:info.messageId,recipient});
-        return json(res,201,{ok:true,sent:true});
-      }catch(err){
-        console.error('smtp_test_failed',err?.message||err);
-        return json(res,500,{ok:false,error:'smtp_test_failed'});
-      }
-    }
-    return json(res,200,{ok:true,smtpConfigured:configured});
-  }
   if(req.method!=='POST') return json(res,405,{ok:false,error:'method_not_allowed'});
   try{
     const data=await readBody(req);
@@ -164,4 +130,3 @@ module.exports = async function handler(req,res){
   }
 };
 
-// redeploy-marker: refresh preview environment
