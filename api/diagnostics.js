@@ -85,6 +85,10 @@ function buildEmail(data) {
 }
 
 module.exports = async function handler(req,res){
+  if(req.method==='GET') {
+    const configured=Boolean(process.env.SMTP_HOST&&process.env.SMTP_USER&&process.env.SMTP_PASS&&(process.env.SMTP_FROM||process.env.SMTP_USER));
+    return json(res,200,{ok:true,smtpConfigured:configured});
+  }
   if(req.method!=='POST') return json(res,405,{ok:false,error:'method_not_allowed'});
   try{
     const data=await readBody(req);
