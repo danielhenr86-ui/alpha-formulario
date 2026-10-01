@@ -95,7 +95,7 @@ module.exports = async function handler(req,res){
     const user=String(process.env.SMTP_USER||'').trim();
     const pass=process.env.SMTP_PASS;
     const from=String(process.env.SMTP_FROM||user).trim();
-    const recipient=String(process.env.FORM_RECIPIENT||'contato@metongestao.com.br').trim();
+    const recipient='contato@metongestao.com.br';
 
     if(!host||!user||!pass||!from){
       console.error('smtp_not_configured');
