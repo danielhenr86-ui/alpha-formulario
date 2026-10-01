@@ -91,12 +91,12 @@ module.exports = async function handler(req,res){
     if(url.searchParams.get('sendTest')==='1'){
       if(!configured) return json(res,503,{ok:false,error:'smtp_not_configured'});
       try{
-        const host=process.env.SMTP_HOST;
+        const host=String(process.env.SMTP_HOST||'').trim();
         const port=Number(process.env.SMTP_PORT||465);
-        const user=process.env.SMTP_USER;
+        const user=String(process.env.SMTP_USER||'').trim();
         const pass=process.env.SMTP_PASS;
-        const from=process.env.SMTP_FROM||user;
-        const recipient=process.env.FORM_RECIPIENT||'contato@metongestao.com.br';
+        const from=String(process.env.SMTP_FROM||user).trim();
+        const recipient=String(process.env.FORM_RECIPIENT||'contato@metongestao.com.br').trim();
         const transporter=nodemailer.createTransport({
           host,
           port,
@@ -124,12 +124,12 @@ module.exports = async function handler(req,res){
     const data=await readBody(req);
     if(!data?.result?.recommendedPlan) return json(res,400,{ok:false,error:'invalid_diagnostic'});
 
-    const host=process.env.SMTP_HOST;
+    const host=String(process.env.SMTP_HOST||'').trim();
     const port=Number(process.env.SMTP_PORT||465);
-    const user=process.env.SMTP_USER;
+    const user=String(process.env.SMTP_USER||'').trim();
     const pass=process.env.SMTP_PASS;
-    const from=process.env.SMTP_FROM||user;
-    const recipient=process.env.FORM_RECIPIENT||'contato@metongestao.com.br';
+    const from=String(process.env.SMTP_FROM||user).trim();
+    const recipient=String(process.env.FORM_RECIPIENT||'contato@metongestao.com.br').trim();
 
     if(!host||!user||!pass||!from){
       console.error('smtp_not_configured');
