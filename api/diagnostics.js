@@ -1,6 +1,7 @@
 'use strict';
 
 const nodemailer = require('nodemailer');
+const { insertLead } = require('../lib/growth-store');
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -90,6 +91,14 @@ module.exports = async function handler(req,res){
     const data=await readBody(req);
     if(!data?.result?.recommendedPlan) return json(res,400,{ok:false,error:'invalid_diagnostic'});
 
+    let growth = { stored: false };
+    try {
+      const lead = await insertLead(data);
+      growth = { stored: true, score: lead.score, lifecycleStage: lead.lifecycleStage };
+    } catch (storeError) {
+      console.error('growth_lead_store_failed', storeError?.message || storeError);
+    }
+
     const host=String(process.env.SMTP_HOST||'').trim();
     const port=Number(process.env.SMTP_PORT||465);
     const user=String(process.env.SMTP_USER||'').trim();
@@ -123,7 +132,7 @@ module.exports = async function handler(req,res){
     });
 
     console.log('diagnostic_email_sent',{messageId:info.messageId,recipient});
-    return json(res,201,{ok:true});
+    return json(res,201,{ok:true,...growth});
   }catch(err){
     console.error('diagnostic_email_failed',err?.message||err);
     return json(res,500,{ok:false,error:'email_delivery_failed'});
