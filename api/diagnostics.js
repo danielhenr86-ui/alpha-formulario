@@ -1,8 +1,34 @@
 'use strict';
 
 const nodemailer = require('nodemailer');
+const { insertLead } = require('../lib/growth-store');
 
 const MAX_BODY_BYTES = 64 * 1024;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 10;
+const rateLimitBuckets = new Map();
+
+function getHeader(req,name){
+  const headers=req.headers||{};
+  const value=headers[name] ?? headers[name.toLowerCase()];
+  return Array.isArray(value)?value[0]:value;
+}
+function clientKey(req){
+  const ff=getHeader(req,'x-forwarded-for');
+  return (typeof ff==='string'&&ff.split(',')[0].trim()) || req.socket?.remoteAddress || 'unknown';
+}
+function sameOrigin(req){
+  const origin=getHeader(req,'origin');
+  const host=getHeader(req,'x-forwarded-host')||getHeader(req,'host');
+  if(!origin||!host) return false;
+  try{return new URL(origin).host===host}catch{return false}
+}
+function rateAllowed(key,now=Date.now()){
+  const current=rateLimitBuckets.get(key);
+  if(!current||current.resetAt<=now){rateLimitBuckets.set(key,{count:1,resetAt:now+RATE_LIMIT_WINDOW_MS});return true}
+  if(current.count>=RATE_LIMIT_MAX_REQUESTS)return false;
+  current.count+=1;return true;
+}
 
 function json(res, code, body) {
   res.statusCode = code;
@@ -86,9 +112,21 @@ function buildEmail(data) {
 
 module.exports = async function handler(req,res){
   if(req.method!=='POST') return json(res,405,{ok:false,error:'method_not_allowed'});
+  if(!sameOrigin(req)) return json(res,403,{ok:false,error:'origin_not_allowed'});
+  if(!rateAllowed(clientKey(req))) return json(res,429,{ok:false,error:'rate_limit_exceeded'});
+  const contentType=getHeader(req,'content-type')||'';
+  if(!contentType.toLowerCase().includes('application/json')) return json(res,415,{ok:false,error:'content_type_not_supported'});
   try{
     const data=await readBody(req);
     if(!data?.result?.recommendedPlan) return json(res,400,{ok:false,error:'invalid_diagnostic'});
+
+    let growth = { stored: false };
+    try {
+      const lead = await insertLead(data);
+      growth = { stored: true, score: lead.score, lifecycleStage: lead.lifecycleStage };
+    } catch (storeError) {
+      console.error('growth_lead_store_failed', storeError?.message || storeError);
+    }
 
     const host=String(process.env.SMTP_HOST||'').trim();
     const port=Number(process.env.SMTP_PORT||465);
@@ -123,7 +161,7 @@ module.exports = async function handler(req,res){
     });
 
     console.log('diagnostic_email_sent',{messageId:info.messageId,recipient});
-    return json(res,201,{ok:true});
+    return json(res,201,{ok:true,...growth});
   }catch(err){
     console.error('diagnostic_email_failed',err?.message||err);
     return json(res,500,{ok:false,error:'email_delivery_failed'});
