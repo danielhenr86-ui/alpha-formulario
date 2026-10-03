@@ -46,6 +46,7 @@ module.exports = async function handler(req, res) {
     const body = await readBody(req);
     await insertEvent({
       eventName: body.eventName,
+      leadId: body.leadId,
       sessionId: body.sessionId,
       path: body.path,
       attribution: body.attribution,
