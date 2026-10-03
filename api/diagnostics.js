@@ -18,11 +18,15 @@ function clientKey(req){
   return (typeof ff==='string'&&ff.split(',')[0].trim()) || req.socket?.remoteAddress || 'unknown';
 }
 function sameOrigin(req){
+  const fetchSite=String(getHeader(req,'sec-fetch-site')||'').toLowerCase();
+  if(fetchSite==='same-origin'||fetchSite==='same-site') return true;
+
   const origin=getHeader(req,'origin');
   if(!origin) return false;
   try{
     const hostname=new URL(origin).hostname.toLowerCase();
     return hostname==='formulario.metongestao.com.br'
+      || hostname==='www.formulario.metongestao.com.br'
       || hostname==='meton-diagnostico.vercel.app'
       || (hostname.startsWith('meton-diagnostico-')&&hostname.endsWith('.vercel.app'));
   }catch{return false}
@@ -116,7 +120,7 @@ function buildEmail(data) {
 
 module.exports = async function handler(req,res){
   if(req.method!=='POST') return json(res,405,{ok:false,error:'method_not_allowed'});
-  if(!sameOrigin(req)) return json(res,403,{ok:false,error:'origin_not_allowed'});
+  if(!sameOrigin(req)){console.warn('diagnostic_origin_rejected',{origin:getHeader(req,'origin')||null,fetchSite:getHeader(req,'sec-fetch-site')||null,host:getHeader(req,'host')||null});return json(res,403,{ok:false,error:'origin_not_allowed'});}
   if(!rateAllowed(clientKey(req))) return json(res,429,{ok:false,error:'rate_limit_exceeded'});
   const contentType=getHeader(req,'content-type')||'';
   if(!contentType.toLowerCase().includes('application/json')) return json(res,415,{ok:false,error:'content_type_not_supported'});
