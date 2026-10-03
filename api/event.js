@@ -4,6 +4,18 @@ const { insertEvent } = require('../lib/growth-store');
 
 const MAX_BODY_BYTES = 16 * 1024;
 
+function getHeader(req,name){
+  const headers=req.headers||{};
+  const value=headers[name] ?? headers[name.toLowerCase()];
+  return Array.isArray(value)?value[0]:value;
+}
+function sameOrigin(req){
+  const origin=getHeader(req,'origin');
+  const host=getHeader(req,'x-forwarded-host')||getHeader(req,'host');
+  if(!origin||!host) return false;
+  try{return new URL(origin).host===host}catch{return false}
+}
+
 function json(res, code, body) {
   res.statusCode = code;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -26,6 +38,9 @@ async function readBody(req) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return json(res, 405, { ok: false, error: 'method_not_allowed' });
+  if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'origin_not_allowed' });
+  const contentType=getHeader(req,'content-type')||'';
+  if(!contentType.toLowerCase().includes('application/json')) return json(res,415,{ok:false,error:'content_type_not_supported'});
 
   try {
     const body = await readBody(req);
