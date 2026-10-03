@@ -2,6 +2,7 @@
 
 const nodemailer = require('nodemailer');
 const { insertLead } = require('../lib/growth-store');
+const { sendDiagnosticTemplate } = require('../lib/whatsapp');
 
 const MAX_BODY_BYTES = 64 * 1024;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -128,6 +129,14 @@ module.exports = async function handler(req,res){
       console.error('growth_lead_store_failed', storeError?.message || storeError);
     }
 
+    let whatsapp = { sent: false, reason: 'not_attempted' };
+    try {
+      whatsapp = await sendDiagnosticTemplate(data);
+    } catch (whatsappError) {
+      console.error('whatsapp_diagnostic_send_failed', whatsappError?.message || whatsappError);
+      whatsapp = { sent: false, reason: 'send_failed' };
+    }
+
     const host=String(process.env.SMTP_HOST||'').trim();
     const port=Number(process.env.SMTP_PORT||465);
     const user=String(process.env.SMTP_USER||'').trim();
@@ -161,7 +170,7 @@ module.exports = async function handler(req,res){
     });
 
     console.log('diagnostic_email_sent',{messageId:info.messageId,recipient});
-    return json(res,201,{ok:true,...growth});
+    return json(res,201,{ok:true,...growth,whatsapp});
   }catch(err){
     console.error('diagnostic_email_failed',err?.message||err);
     return json(res,500,{ok:false,error:'email_delivery_failed'});
