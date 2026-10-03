@@ -19,9 +19,13 @@ function clientKey(req){
 }
 function sameOrigin(req){
   const origin=getHeader(req,'origin');
-  const host=getHeader(req,'x-forwarded-host')||getHeader(req,'host');
-  if(!origin||!host) return false;
-  try{return new URL(origin).host===host}catch{return false}
+  if(!origin) return false;
+  try{
+    const hostname=new URL(origin).hostname.toLowerCase();
+    return hostname==='formulario.metongestao.com.br'
+      || hostname==='meton-diagnostico.vercel.app'
+      || (hostname.startsWith('meton-diagnostico-')&&hostname.endsWith('.vercel.app'));
+  }catch{return false}
 }
 function rateAllowed(key,now=Date.now()){
   const current=rateLimitBuckets.get(key);
