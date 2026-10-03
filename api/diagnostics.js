@@ -123,7 +123,7 @@ module.exports = async function handler(req,res){
     let growth = { stored: false };
     try {
       const lead = await insertLead(data);
-      growth = { stored: true, score: lead.score, lifecycleStage: lead.lifecycleStage };
+      growth = { stored: true, leadId: lead.id, score: lead.score, lifecycleStage: lead.lifecycleStage };
     } catch (storeError) {
       console.error('growth_lead_store_failed', storeError?.message || storeError);
     }
